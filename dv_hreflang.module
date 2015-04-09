@@ -33,7 +33,7 @@ function dv_hreflang_form_domain_variants_form_alter(&$form, &$form_state) {
     $form['domain_variant']['dv_hreflang'] = array(
       '#type' => 'textfield',
       '#title' => t('SEO hreflang'),
-      '#description' => t('Only one domain variant should have "x-default" hreflang.'),
+      '#description' => t('Only one domain variant should have "x-default" hreflang. See <a href="@hreflang_article">this article</a> for further information.', array('@hreflang_article' => 'http://www.amazeemetrics.com/en/blog/seo-tutorial-geo-targeting-with-hreflang-tag')),
       '#default_value' => dv_hreflang_get($form['variant_id']['#value']),
     );
     $form['#submit'][] = 'dv_hreflang_domain_variants_submit';
