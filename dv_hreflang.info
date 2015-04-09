@@ -1,0 +1,5 @@
+name = Domain Variants SEO hreflang
+description = Provides hreflang support.
+core = 7.x
+
+dependenices[] = domain_variants

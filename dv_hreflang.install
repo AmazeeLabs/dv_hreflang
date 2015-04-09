@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function dv_hreflang_schema() {
+  $schema = array();
+  $schema['domain_variants_hreflang'] = array(
+    'fields' => array(
+      'variant_id' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'hreflang' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('variant_id'),
+  );
+  return $schema;
+}

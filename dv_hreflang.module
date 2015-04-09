@@ -1,0 +1,69 @@
+<?php
+
+/**
+ * Implements hook_init().
+ */
+function dv_hreflang_init() {
+  $active_dv_id = !empty($GLOBALS['_domain_variant']->variant_id) ? $GLOBALS['_domain_variant']->variant_id : NULL;
+
+  // Reuse domain variants switcher form to get URLs.
+  $form_state = array();
+  $switcher_form = domain_variants_switcher_form(array(), $form_state, array());
+  foreach (element_children($switcher_form) as $key) {
+    if (strpos($key, 'v_') === 0) {
+      $hreflang = dv_hreflang_get($switcher_form[$key]['#domain_variant']->variant_id);
+      if (!empty($hreflang)) {
+        $url = $switcher_form[$key]['#default_value'];
+        $attributes = array(
+          'href' => $url,
+          'rel' => 'alternate',
+          'hreflang' => $hreflang,
+        );
+        drupal_add_html_head_link($attributes);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function dv_hreflang_form_domain_variants_form_alter(&$form, &$form_state) {
+  if (!empty($form['variant_id']['#value'])) {
+    $form['domain_variant']['dv_hreflang'] = array(
+      '#type' => 'textfield',
+      '#title' => t('SEO hreflang'),
+      '#description' => t('Only one domain variant should have "x-default" hreflang.'),
+      '#default_value' => dv_hreflang_get($form['variant_id']['#value']),
+    );
+    $form['#submit'][] = 'dv_hreflang_domain_variants_submit';
+  }
+}
+
+/**
+ * Additional submit handler for the domain_variants_form.
+ */
+function dv_hreflang_domain_variants_submit(&$form, &$form_state) {
+  db_delete('domain_variants_hreflang')
+    ->condition('variant_id', $form_state['values']['variant_id'])
+    ->execute();
+  if (!empty($form_state['values']['dv_hreflang'])) {
+    db_insert('domain_variants_hreflang')
+      ->fields(array(
+        'variant_id' => $form_state['values']['variant_id'],
+        'hreflang' => $form_state['values']['dv_hreflang'],
+      ))
+      ->execute();
+  }
+}
+
+/**
+ * Returns domain variant hreflang, of FALSE if not found.
+ */
+function dv_hreflang_get($domain_variant_id) {
+  return db_select('domain_variants_hreflang', 'h')
+    ->condition('h.variant_id', $domain_variant_id)
+    ->fields('h', array('hreflang'))
+    ->execute()
+    ->fetchField();
+}
